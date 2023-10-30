@@ -1,7 +1,12 @@
 
 <?php
     @include('conexao_query.php');
-    
+    session_start();
+    if(!isset($_SESSION["usuario"])){
+      header("Location: /sulvale1/index.php");
+      exit;
+    }
+
     if(isset($_POST["produto1"])){
 
     $produto=$_POST["produto1"];
@@ -9,7 +14,7 @@
     $quantidade=$_POST["quantidade1"];
     $id=$_POST["id"];
     if(!empty($id)){
-      $sql003="insert into produto(nome,preco,quantidade) values('$produto',$preco,$quantidade);";
+      $sql003="update produto set nome='$produto',preco=$preco,quantidade=$quantidade where id=$id;";
     }
     else{
       $sql003="insert into produto(nome,preco,quantidade) values('$produto',$preco,$quantidade);";
@@ -22,7 +27,7 @@
        }
     
         $sql002 ="";
-        $sql002 ="select id, nome,quantidade,preco from produto; ";
+        $sql002 ="select id, nome,preco,quantidade from produto; ";
         $res002 = mysql_query($sql002);
         $produtos = [];
         
@@ -45,7 +50,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Cadastro de Produtos</title>
     
     <link rel="stylesheet" href="style.css">
     <link href="css/bootstrap-reboot.min.css" rel="stylesheet" >
@@ -58,19 +63,27 @@
 <body>
 <div class="container">
       <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#">Home</a>
+      <?php
+      if(isset($_SESSION["usuario"]["nome"])){
+        $nome = $_SESSION["usuario"]["nome"];
+        echo "Olá $nome";
+    }     
+        ?>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item active">
-                        <a type="button" class="nav-link" onclick="abrirLogin()">Página de Login</a>
-                    </li>                   
-                    <li class="nav-item">
+                  <li class="nav-item">
                       <a type="button" class="nav-link" onclick="abrirTabelaUsuario()" >Usuarios</a>
                   </li>
-                  
+                  <li class="nav-item">
+                      <a type="button" class="nav-link" onclick="abrirTabelaPerfil()" >Perfis</a>
+                  </li>
+
+                    <li class="nav-item active">
+                    <?php echo "<a href='logout.php' class='nav-link' onclick='return confirm(\"Deseja sair da página\")'>Sair</a>"?>
+                    </li>                                   
                 </ul>
             </div>    
       </nav>
@@ -103,22 +116,23 @@
               else{
                 foreach($produtos as $produto){
                   echo "<tr>
-                  <td>".$produto->id."</td>
-                  <td>".$produto->nome."</td>
-                  <td>".$produto->preco."</td>
-                  <td>".$produto->quantidade."</td>
-                  <td><button id='botaoModal' type='button' data-bs-toggle='modal' data-bs-target='#exempleModal' class='buttonEditar'
-                  onclick='produto.editar(\"" . str_replace('"','\"', json_encode($produto)) . "\")'>Editar</button></td>
-                  </tr>";
+                  <td class='listaScript'>".$produto->id."</td>
+                  <td class='listaScript'>".$produto->nome."</td>
+                  <td class='listaScript'>".$produto->preco."</td>
+                  <td class='listaScript'>".$produto->quantidade."</td>
+                  <td><a class='buttonEditar'onclick='produto.editar(\"" . str_replace('"','\"', json_encode($produto)) . "\")'>Editar</a>
+                      <a href='excluirProduto.php?id=".$produto->id."' class='buttonExcluir' onclick='return confirm(\"Deseja excluir o produto de ".$produto->nome."\")'>Excluir </a>
+                  </td>
+                  </tr>";                
                 }
               }
+            
               ?>
             </tbody>
         </table>
         </div>
     </div>
-
-
+    
       <!-- Modal de cadastro-->
       <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -131,23 +145,22 @@
             <div class="modal-body">
               <input type="hidden" id="id" name="id" value="">
               <div class="row label">               
-                    <label >Nome Produto</label>
-                    <input name="produto1" class="inputTamanho" type="text"  id="produto" value="" placeholder="Nome" required>
+                    <label class="labelNome" >Nome Produto</label>
+                    <input style="width: 466px;" name="produto1" class="inputTamanho" type="text"  id="produto" value="" placeholder="Nome" required>
               </div>                
                 <div class="row label">               
-                  <label class="label">Preço Produto</label>
-                  <input name="preco1" class="inputTamanho" type="number"  id="preco" value="" placeholder="Preço" required>                  
+                  <label class="labelNome">Preço Produto</label>
+                  <input style="width: 466px;" name="preco1" class="inputTamanho" type="number"  id="preco" value="" placeholder="Preço" required>                  
               </div>
               <div class="row label">
-                    <label class="label">Quantidade</label>
-                    <input name="quantidade1" class="inputTamanho" type="number"  id="quantidade" value="" placeholder="Quantidade" required>  
+                    <label class="labelNome">Quantidade</label>
+                    <input style="width: 466px;" name="quantidade1" class="inputTamanho" type="number"  id="quantidade" value="" placeholder="Quantidade" required>  
              </div>
           </div>
               <div class="modal-footer">
               <button type="reset" id="btnCancelar" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>  
               <button onclick="produto.limpar()" type="reset"  id="btnLimpar" class="btn btn-primary">Limpar</button>
-              <button onclick="produto.salvar()" type="button" id="btnAdicionar" class="btn btn-primary">Salvar</button>
-              <input type="submit" value="enviar">            
+              <input type="submit" class="btn btn-primary" value="Salvar" id="btnAdicionar">            
             </div>            
             </div>
             </form>
@@ -169,24 +182,25 @@
       this.editId=null;
     }
      
-  pesquisa() {
-    const termoPesquisa = document.getElementById('searchbar').value.toLowerCase().trim();
-
-      if(termoPesquisa===""){
-            this.listaTabela(produto.arrayProdutos);
-            return true;
-          }
-    const resultados = produto.arrayProdutos.filter((produto) =>
-    produto.nomeProduto.toLowerCase()===(termoPesquisa)
-    );
-    if(resultados===undefined || resultados.length==0){
-        alert("Nenhum produto cadastrado com esse nome!");
-        return true;
-      }
+   pesquisa() {
+     const termoPesquisa = document.getElementById('searchbar').value.toLowerCase().trim();
+  
+       if(termoPesquisa===""){
+             this.listaTabela(produto.arrayProdutos);
+             return true;
+           }
+     const resultados = produto.arrayProdutos.filter((produto) =>
+     produto.nome.toLowerCase()===(termoPesquisa)
+     );
      
-    produto.listaTabela(resultados);
-    //console.log(termoPesquisa);
-    }
+     if(resultados===undefined || resultados.length==0){
+         alert("Nenhum produto cadastrado com esse nome!");
+         return true;
+       }
+     
+     produto.listaTabela(resultados);
+      
+     }
        
     // Funcion que envia informacoes cadastradas para a tabela
     salvar(){
@@ -204,79 +218,81 @@
         this.listaTabela(this.arrayProdutos);
         this.limpar();
     }
-    // Funcion que cria as array e linhas da tabela 
-    // listaTabela(produtos){
-    //   let tbody=document.getElementById('tbody');
-    //   tbody.innerText ='';
+     //Funcion que cria as array e linhas da tabela 
+     listaTabela(produtos){
+       let tbody=document.getElementById('tbody');
+      tbody.innerText ='';
 
-    //   if(produtos===undefined || produtos.length==0){
+       if(produtos===undefined || produtos.length==0){
         
-    //     let tr=tbody.insertRow();
+         let tr=tbody.insertRow();
 
-    //     let td_Id =tr.insertCell();
-    //     let td_Produto =tr.insertCell();
-    //     let td_Preco =tr.insertCell();
-    //     let td_Quantidade =tr.insertCell();
-    //     let td_Opcoes =tr.insertCell();
+         let td_Id =tr.insertCell();
+         let td_Produto =tr.insertCell();
+         let td_Preco =tr.insertCell();
+         let td_Quantidade =tr.insertCell();
+         let td_Opcoes =tr.insertCell();
 
-    //     td_Id.classList.add('listaScript');
-    //     td_Produto.classList.add('listaScript');
-    //     td_Preco.classList.add('listaScript');
-    //     td_Quantidade.classList.add('listaScript');
-    //     td_Opcoes.classList.add('listaScript');
+         td_Id.classList.add('listaScript');
+        td_Produto.classList.add('listaScript');
+         td_Preco.classList.add('listaScript');
+         td_Quantidade.classList.add('listaScript');
+         td_Opcoes.classList.add('listaScript');
 
-    //     td_Id.innerText=("null");
-    //     td_Produto.innerText=("Nenhum produto");
-    //     td_Preco.innerText=("Nenhum preço");
-    //     td_Quantidade.innerText=("Nenhuma quantidade");
-    //   }
-    //   console.log(produtos)
-    //   for(let i= 0; i < produtos.length; i++){
-    //     let tr=tbody.insertRow();
+         td_Id.innerText=("null");
+        td_Produto.innerText=("Nenhum produto");
+         td_Preco.innerText=("Nenhum preço");
+        td_Quantidade.innerText=("Nenhuma quantidade");
+       }
+       console.log(produtos)
+       for(let i= 0; i < produtos.length; i++){
+         let tr=tbody.insertRow();
 
-    //     let td_Id =tr.insertCell();
-    //     let td_Produto =tr.insertCell();
-    //     let td_Preco =tr.insertCell();
-    //     let td_Quantidade =tr.insertCell();
-    //     let td_Opcoes =tr.insertCell();
+         let td_Id =tr.insertCell();
+         let td_Produto =tr.insertCell();
+        let td_Preco =tr.insertCell();
+         let td_Quantidade =tr.insertCell();
+         let td_Opcoes =tr.insertCell();
 
-    //     td_Id.classList.add('listaScript');
-    //     td_Produto.classList.add('listaScript');
-    //     td_Preco.classList.add('listaScript');
-    //     td_Quantidade.classList.add('listaScript');
-    //     td_Opcoes.classList.add('listaScript');
+         td_Id.classList.add('listaScript');
+         td_Produto.classList.add('listaScript');
+         td_Preco.classList.add('listaScript');
+         td_Quantidade.classList.add('listaScript');
+         td_Opcoes.classList.add('listaScript');
         
-    //     td_Id.innerText=produtos[i].id;
-    //     td_Produto.innerText=produtos[i].nomeProduto;
-    //     td_Preco.innerText=produtos[i].preco;
-    //     td_Quantidade.innerText=produtos[i].quandidade;
+         td_Id.innerText=produtos[i].id;
+         td_Produto.innerText=produtos[i].nome;
+         td_Preco.innerText=produtos[i].preco;
+         td_Quantidade.innerText=produtos[i].quantidade;
                 
-    //     var buttonEditar = document.createElement('button');
-    //     buttonEditar.setAttribute("data-bs-toggle","modal");
-    //     buttonEditar.setAttribute("data-bs-target","#exampleModal");
-    //     buttonEditar.setAttribute("onclick","produto.editar("+JSON.stringify(produtos[i])+")");
-    //     td_Opcoes.appendChild(buttonEditar);
-    //     buttonEditar.appendChild(document.createTextNode('Editar'));
-    //     buttonEditar.classList.add('buttonEditar');
+         var buttonEditar = document.createElement('button');
+         buttonEditar.setAttribute("data-bs-toggle","modal");
+         buttonEditar.setAttribute("data-bs-target","#exampleModal");
+         buttonEditar.setAttribute("onclick","produto.editar("+JSON.stringify(produtos[i])+")");
+         td_Opcoes.appendChild(buttonEditar);
+         buttonEditar.appendChild(document.createTextNode('Editar'));
+         buttonEditar.classList.add('buttonEditar');
         
-    //     var buttonExcluir = document.createElement('button');
-    //     buttonExcluir.setAttribute("onclick","produto.excluir("+produtos[i].id+")");
-    //     buttonExcluir.appendChild(document.createTextNode('Excluir'));
-    //     td_Opcoes.appendChild(buttonExcluir);
-    //     buttonExcluir.classList.add('buttonExcluir');
+         var buttonExcluir = document.createElement('button');
+         buttonExcluir.setAttribute("onclick","produto.excluir("+produtos[i].id+")");
+         buttonExcluir.appendChild(document.createTextNode('Excluir'));
+         td_Opcoes.appendChild(buttonExcluir);
+         buttonExcluir.classList.add('buttonExcluir');
         
-    //   }
-    // }
+       }
+     }
 
 
     editar(dados){
+      dados=JSON.parse(dados)
       this.editId=dados.id;
       //console.log(dados);
-        
-      document.getElementById('produto').value=dados.nomeProduto;
-      document.getElementById('preco').value=dados.preco;
-      document.getElementById('quantidade').value=dados.quandidade;
-      document.getElementById('id').value=dados.id;
+      const myModal = new bootstrap.Modal(document.getElementById('exampleModal'));myModal.show();
+
+       document.getElementById('produto').value=dados.nome;
+       document.getElementById('preco').value=dados.preco;
+       document.getElementById('quantidade').value=dados.quantidade;
+       document.getElementById('id').value=dados.id;
       }
 
 
@@ -309,7 +325,7 @@
     validaCampos(produto){
        let msg= "";
 
-       if (produto.nomeProduto == ''){
+       if (produto.nome == ''){
          msg+="- Informe o nome do produto\n"
        }
        if (produto.preco == ''){
@@ -333,16 +349,17 @@
      }
 
      excluir(id){
+      
       if(confirm('Deseja excluir o produto do ID ' +id)){
 
         let tbody=document.getElementById('tbody');
 
-        for(let i= 0; i < this.arrayProdutos.length; i++){
-          if(this.arrayProdutos[i].id == id){
-            this.arrayProdutos.splice(i,1);
-            tbody.deleteRow(i);
-          }
-        } 
+        // for(let i= 0; i < this.arrayProdutos.length; i++){
+        //   if(this.arrayProdutos[i].id == id){
+        //     this.arrayProdutos.splice(i,1);
+        //     tbody.deleteRow(i);
+        //   }
+        // } 
     }
       
      }
@@ -358,7 +375,11 @@ var produto = new Produto();
   function abrirTabelaUsuario() {
     window.location.href = "tabelaUsuario.php";
   }
+  function abrirTabelaPerfil() {
+            window.location.href = "perfil.php";
+          }
 
 // produto.listaTabela();
 
 </script>
+<?php  echo "<script> produto.arrayProdutos = JSON.parse('" . json_encode($produtos) . "')</script>" ?>

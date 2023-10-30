@@ -1,12 +1,43 @@
 <?php
-    $email=null;
-    if($_POST){
-      
-        $email = $_POST['email'];
-        $senha = $POST['senha'];
+    
+    @include('conexao_query.php');
+    session_start();
+
+
+    if(isset($_SESSION["usuario"])){
+      header("Location: /sulvale1/tabela.php");
+      exit;
     }
-    var_dump($email);
-  ?>
+
+    if (isset($_POST["email"])) {
+      $email = trim($_POST["email"]);
+      $senha = $_POST["senha"];
+
+      $query="select * from usuario where email='$email' and  senha='$senha'";
+      $result=mysql_query($query);
+
+      if (mysql_num_rows($result) == 1) {
+
+
+        while($linha=mysql_fetch_array($result)){
+
+              $usuario=[
+                'id' => $linha[0],
+                'nome' => trim($linha[1]),
+                'email' =>trim($linha[2]),
+                'senha' => $linha[3]
+              ];             
+        }
+        $_SESSION["usuario"] =$usuario;
+
+        header("Location: /sulvale1/tabela.php");
+        exit;
+      }
+      else{
+        echo"Erro: Email ou senha invalidos.";
+      }     
+    }
+?>
 
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -21,7 +52,7 @@
 </head>
 <body>
 
-    <form class="mt-5" action="/sulvale1/index.php" method="POST">
+    <form class="mt-5" action="/sulvale1/index.php" method="post">
         <h2 class="text-center">Faça seu Login</h2>
         <div class="form-group col-md-5 mx-auto">
           <label for="exampleInputEmail1">Endereço de email</label>
@@ -39,9 +70,9 @@
         </div>
 
         <div class="form-group col-md-5 mx-auto text-center">
-          <button type="button" class="btn btn-primary  " onclick="abrirTabela()">Entrar</button>
+          <input type="submit" class="btn btn-primary  " value="Entrar" >
           <button type="button" class="btn btn-primary " onclick="abrirCadastro()">Cadastrar-se</button> 
-          <div class="g-recaptcha p-3 " data-sitekey="6Lfbb48oAAAAALjbD8IZY5p89wcZdxeo7cINIZ6V"></div> 
+          <!-- <div class="g-recaptcha p-3 " data-sitekey="6Lfbb48oAAAAALjbD8IZY5p89wcZdxeo7cINIZ6V"></div>  -->
       </form> 
         </div>
         <script>

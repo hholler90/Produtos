@@ -31,8 +31,7 @@ body {
     font-size: medium;
     background-color: whitesmoke;  
     border: 1px solid #ccc;
-    border-radius: 10px;
-       
+    align-items: center;
 }
   
   #searchbar {
@@ -68,6 +67,7 @@ body {
     text-align: center;
     border: 1px solid black;
     padding: 8px;
+    width: 200px;
   }
   
   /* Modal de cadastro */
@@ -111,6 +111,8 @@ body {
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 5px;
+    width: 466px;
+    margin-left: 12px; 
   }
   
   .modal-footer {
@@ -162,6 +164,7 @@ body {
     border-radius: 5px;
     cursor: pointer;
     margin-left: 5px;
+    text-decoration: none;
   }
   
   .buttonExcluir:hover {
@@ -182,4 +185,6 @@ body {
   .buttonEditar:hover {
     background-color: #0056b3;
   }
-  
+  .labelNome{
+    margin-left: 5px;
+  }

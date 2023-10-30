@@ -8,16 +8,16 @@ $con_sgi = mysql_connect($host,$user,$senha) or die ("Erro: Falha ao conectar ao
 $selsgi = mysql_select_db($banco,$con_sgi);
 
 
-//@include('conexao.php')
+//@include('conexao_query.php')
 
 //=====================
 //Clientes
 //=====================
-//  $sql001 ="";
-//  $sql001 ="insert into usuario(nome,email,senha) value('carlos','carlos@gmail.com','teste');";
-//  $res001 = mysql_query($sql001);
-//  echo "\nsql:".$sql001;
-//  echo "\nerror:".mysql_error();
+    // $sql001 ="";
+    // $sql001 ="insert into usuario(nome,email,senha) value('carlos','carlos@gmail.com','teste');";
+    // $res001 = mysql_query($sql001);
+    // echo "\nsql:".$sql001;
+    // echo "\nerror:".mysql_error();
 
 
 // $sql002 ="";

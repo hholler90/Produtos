@@ -6,54 +6,33 @@
       exit;
     }
 
-  if(isset($_POST["usuario"])){
-    $usuario=$_POST["usuario"];
-    $email=$_POST["email"];
-    $senha=$_POST["senha"];
+  if(isset($_POST["perfil_nome"])){
+    $perfil_nome=$_POST["perfil_nome"];
     $id=$_POST["id"];
-    $perfil_id = $_POST["perfil_id"];
 
-      $query = "select nome,email from usuario where email='$email' OR nome='$usuario'";  
-     if(!empty($id)){
-         $query_email.=" and id!= $id";
-       }
-       $result=mysql_query($query);
-
-       if( (mysql_num_rows($result) > 0) ){
-         echo "<script>alert('Este email ou usuario já foram cadastrados!');</script>";
-       }
-     else{
-      if(!empty($id)){
-            $sql003="update usuario set nome='$usuario',email='$email', senha='$senha',perfil_id=$perfil_id where id=$id;";
-        }
-      else{
-            $sql003="insert into usuario(nome,email,senha,perfil_id) values('$usuario','$email','$senha',$perfil_id);";
-        }
+    if(!empty($id)){
+        $sql003="update usuario set perfil_nome='$perfil_nome' where id=$id;";
+    }
+    else{
+        $sql003="insert into perfis(perfil_nome) values('$perfil_nome');";
+    }
       $sql003 = mysql_query($sql003);
       echo "\nsql:".$sql003;
       echo "\nerror:".mysql_error();
-    }    
-  }
-    
+  }      
         $sql002 ="";
-        $sql002 = "SELECT u.id, u.nome, u.email, p.perfil_nome FROM usuario u INNER JOIN perfis p ON u.perfil_id = p.id";
+        $sql002 ="select id, perfil_nome from perfis; ";
         $res002 = mysql_query($sql002);
-
-        $sql002 = mysql_query($sql002);
-        echo "\nsql:".$sql002;
-        echo "\nerror:".mysql_error();
-
-        $usuarios = [];
+        
+        $perfis = [];
         
     if(mysql_num_rows($res002)>0){       
        while($linha=mysql_fetch_array($res002)){
-        $usuarios[] = (object)[
+        $perfis[] = (object)[
           'id' =>trim ($linha[0]),
-          'nome' =>trim($linha[1]),
-          'email' =>trim ($linha[2]),
-          'perfil_nome' =>trim ($linha[3])
+          'perfil_nome' =>trim($linha[1]),
         ];
-        
+
        }
       }
   ?>
@@ -62,7 +41,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tabela de Usuários</title>
+    <title>Cadastro de Perfis</title>
     <link rel="stylesheet" href="style.css">
     <link href="css/bootstrap-reboot.min.css" rel="stylesheet" >
     <script src="js/bootstrap.bundle.js"></script>
@@ -89,10 +68,10 @@
               <ul class="navbar-nav">              
                   <li class="nav-item">
                     <a type="button" class="nav-link" onclick="abrirTabela()" >Produtos</a>
-                </li> 
+                </li>
                 <li class="nav-item">
-                      <a type="button" class="nav-link" onclick="abrirTabelaPerfil()" >Perfis</a>
-                  </li>               
+                    <a type="button" class="nav-link" onclick="abrirTabelaUsuario()" >Usuários</a>
+                </li>                       
               </ul>
               <ul class="navbar-nav ml-10" >
             <li class="nav-item dropdown">
@@ -109,43 +88,38 @@
         </ul>
           </div>    
     </nav>
-    <h2>Tabela de Usuários</h2>
+    <h2>Tabela de Perfis</h2>
     <!-- Barra de pesquisa e botão que chama o modal de cadastro -->
     <div class="barraPesquisa">
         <input id="searchbar" type="input" class="form-control w-25 m-1" placeholder="Buscar" aria-label="Search" aria-describedby="search-addon"/>
-        <button type="button" class="btn btn-outline-primary m-1" onclick="usuario.pesquisa()">Buscar</button>
-        <button id="botaoModal" type="button" class="btn btn-primary m-1" data-bs-toggle="modal" data-bs-target="#exampleModal">Novo Usuário</button>
+        <button type="button" class="btn btn-outline-primary m-1" onclick="perfil.pesquisa()">Buscar</button>
+        <button id="botaoModal" type="button" class="btn btn-primary m-1" data-bs-toggle="modal" data-bs-target="#exampleModal">Novo Perfil</button>
     </div>
     <!-- Tabela de Usuários -->
     <div>
         <table class="table table-striped">
             <thead>
                 <th class="th">ID</th>
-                <th class="th">Nome de Usuário</th>
-                <th class="th">Email</th>
-                <th class="th">Tipo de Usuário</th>
+                <th class="th">Nome de Perfil</th>
                 <th class="th">Opções</th>
             </thead>
             <tbody id="tbody">
             <?php 
-              if (count($usuarios)==0){
-                echo "<tr><td>sem usuarios</td></tr>";
+              if (count($perfis)==0){
+                echo "<tr><td>sem perfis</td></tr>";
 
               }
               else{
-                foreach($usuarios as $usuario){
+                foreach($perfis as $perfil){
                   echo "<tr>
-                  <td class='listaScript'>".$usuario->id."</td>
-                  <td class='listaScript'>".$usuario->nome."</td>
-                  <td class='listaScript'>".$usuario->email."</td>
-                  <td class='listaScript'>".$usuario->perfil_nome."</td>
-                  <td><a class='buttonEditar'onclick='usuario.editar(\"" . str_replace('"','\"', json_encode($usuario)) . "\")'>Editar</a>
-                      <a href='excluirUsuario.php?id=".$usuario->id."' class='buttonExcluir' onclick='return confirm(\"Deseja excluir o produto de ".$usuario->nome."\")'>Excluir </a>
+                  <td class='listaScript'>".$perfil->id."</td>
+                  <td class='listaScript'>".$perfil->perfil_nome."</td>
+                  <td><a class='buttonEditar'onclick='perfil.editar(\"" . str_replace('"','\"', json_encode($perfil)) . "\")'>Editar</a>
+                      <a href='excluirPerfil.php?id=".$perfil->id."' class='buttonExcluir' onclick='return confirm(\"Deseja excluir o produto de ".$perfil->nome."\")'>Excluir </a>
                   </td>
                   </tr>";                
                 }
-              }
-            
+              }          
               ?>
             </tbody>
         </table>
@@ -156,35 +130,22 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Cadastro de Usuário</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Cadastro de Perfil</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="/sulvale1/tabelaUsuario.php" method="post">
+            <form action="/sulvale1/perfil.php" method="post">
             <div class="modal-body">
             <input type="hidden" id="id" name="id" value="">
                 <div class="row label">
-                    <label class="labelNome">Nome de Usuário</label>
-                    <input style="width: 466px;" class="inputTamanho" type="text" id="usuario" name="usuario" placeholder="Nome de Usuário" required>
-                </div>
-                <div class="row label">
-                    <label class="labelNome">Email</label>
-                    <input style="width: 466px;" class="inputTamanho" type="email" name="email" id="email" placeholder="Email" required>
-                </div>               
-                <div class="row label">
-                    <label class="labelNome">Senha</label>
-                    <input style="width: 466px;" class="inputTamanho" type="password" name="senha" id="senha" placeholder="Senha" required>
-                </div> 
-                <div class="row label">
                 <label class="labelNome">Tipo de Usuário</label>
-                <select style="width: 466px;" class="inputTamanho" name="perfil_id" id="tipo" >
-                    <option value="1">Padrão</option>
-                    <option value="2">Admin</option>
+                <select style="width: 466px;" class="inputTamanho" name="perfil_nome" id="perfil_nome" >
+                    <option value="Padrão">Padrão</option>
+                    <option value="Admin">Admin</option>
                 </select>
-                </div>
-            </div>
+                </div>                    
             <div class="modal-footer">
                 <button type="reset" id="btnCancelar" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
-                <button type="reset" id="btnLimpar" class="btn btn-primary">Limpar</button>
+                <button onclick="perfil.limpar()" type="reset" id="btnLimpar" class="btn btn-primary">Limpar</button>
                 <input type="submit" class="btn btn-primary" value="Salvar" id="btnAdicionar"> 
             </div>
             </form>
@@ -193,11 +154,11 @@
 </div>
 <script>
   
-class Usuario{
+class Perfil{
 
    constructor(){
      this.id= 1;
-     this.arrayUsuario=[];
+     this.arrayPerfil=[];
      this.editId=null;
    }
     
@@ -205,14 +166,14 @@ class Usuario{
    const termoPesquisa = document.getElementById('searchbar').value.toLowerCase().trim();
 
      if(termoPesquisa===""){
-           this.listaTabela(this.arrayUsuario);
+           this.listaTabela(this.arrayPerfil);
            return true;
          }
-   const resultados = usuario.arrayUsuario.filter((usuario) =>
-   usuario.nome.toLowerCase()===(termoPesquisa)
+   const resultados = perfil.arrayPerfil.filter((perfil) =>
+   perfil.perfil_nome.toLowerCase()===(termoPesquisa)
    );
    if(resultados===undefined || resultados.length==0){
-       alert("Nenhum usuario cadastrado com esse nome!");
+       alert("Nenhum perfil cadastrado com esse nome!");
        return true;
      }
     
@@ -222,78 +183,73 @@ class Usuario{
       
    // Funcion que envia informacoes cadastradas para a tabela
    salvar(){
-       let usuario=this.lerDados();
+       let perfil=this.lerDados();
        
-        if(this.validaCampos(usuario)){
+        if(this.validaCampos(perfil)){
          if (this.editId==null){
-           this.adicionar(usuario);
+           this.adicionar(perfil);
          }
          else{
-           this.atualizar(this.editId,usuario);
+           this.atualizar(this.editId,perfil);
          }
           
         }
-       this.listaTabela(this.arrayUsuario);
+       this.listaTabela(this.arrayPerfil);
        this.limpar();
    }
    // Funcion que cria as array e linhas da tabela 
-   listaTabela(usuarios){
+   listaTabela(perfis){
      let tbody=document.getElementById('tbody');
      tbody.innerText ='';
 
-     if(usuarios===undefined || usuarios.length==0){
+     if(perfis===undefined || perfis.length==0){
        
        let tr=tbody.insertRow();
 
        let td_Id =tr.insertCell();
-       let td_NomeUsuario =tr.insertCell();
-       let td_Email =tr.insertCell();
-       let td_Opcoes =tr.insertCell();
-       let td_perfil_id =tr.insertCell();
+       let td_NomePerfil =tr.insertCell();
+       
+       
 
        td_Id.classList.add('listaScript');
-       td_NomeUsuario.classList.add('listaScript');
-       td_Email.classList.add('listaScript');
+       td_NomePerfil.classList.add('listaScript');
+       td_Tipo.classList.add('listaScript');
        td_Opcoes.classList.add('listaScript');
-       td_perfil_id.classList.add('listaScript');
 
        td_Id.innerText=("null");
-       td_NomeUsuario.innerText=("Nenhum Usuario");
-       td_Email.innerText=("Nenhum email");
+       td_NomePerfil.innerText=("Nenhum Perfil");
+       
        
      }
-     console.log(usuarios)
-     for(let i= 0; i < usuarios.length; i++){
+     console.log(perfis)
+     for(let i= 0; i < perfis.length; i++){
        let tr=tbody.insertRow();
 
        let td_Id =tr.insertCell();
-       let td_NomeUsuario =tr.insertCell();
-       let td_Email =tr.insertCell();
-       let td_perfil_id =tr.insertCell();
+       let td_NomePerfil =tr.insertCell();
+       
        let td_Opcoes =tr.insertCell();
-       
+
        td_Id.classList.add('listaScript');
-       td_NomeUsuario.classList.add('listaScript');
-       td_Email.classList.add('listaScript');
-       td_perfil_id.classList.add('listaScript');
-       td_Opcoes.classList.add('listaScript');
+       td_NomePerfil.classList.add('listaScript');
        
-       td_Id.innerText=usuarios[i].id;
-       td_NomeUsuario.innerText=usuarios[i].nome;
-       td_Email.innerText=usuarios[i].email;
-       td_perfil_id.innerText=usuarios[i].perfil_nome;
+       td_Opcoes.classList.add('listaScript');
+
+       td_Id.innerText=perfis[i].id;
+       td_NomePerfil.innerText=perfis[i].perfil_nome;
+       
        
                
        var buttonEditar = document.createElement('button');
        buttonEditar.setAttribute("data-bs-toggle","modal");
        buttonEditar.setAttribute("data-bs-target","#exampleModal");
-       buttonEditar.setAttribute("onclick","usuario.editar("+JSON.stringify(usuarios[i])+")");
+       buttonEditar.setAttribute("onclick","usuario.editar("+JSON.stringify(perfis[i])+")");
        td_Opcoes.appendChild(buttonEditar);
        buttonEditar.appendChild(document.createTextNode('Editar'));
        buttonEditar.classList.add('buttonEditar');
        
        var buttonExcluir = document.createElement('button');
-       buttonExcluir.setAttribute("onclick","usuario.excluir("+usuarios[i].id+")");
+       buttonExcluir.setAttribute("onclick","usuario.excluir("+perfis[i].id+")");
        buttonExcluir.appendChild(document.createTextNode('Excluir'));
        td_Opcoes.appendChild(buttonExcluir);
        buttonExcluir.classList.add('buttonExcluir');
@@ -310,46 +266,38 @@ class Usuario{
 
 
       document.getElementById('id').value=dados.id;
-      document.getElementById('usuario').value=dados.nome;
-      document.getElementById('email').value=dados.email;
-      document.getElementById('senha').value=dados.senha;
+      document.getElementById('perfil_nome').value=dados.perfil_nome;
       
-
      }
-
-
-   atualizar(id,usuario){ 
-       for (let i=0; i<this.arrayUsuario.length;i ++){
-           if(this.arrayUsuario[i].id==id){
-             this.arrayUsuario[i].nome=usuario.nome;
-             this.arrayUsuario[i].email=usuario.email;
-             this.arrayUsuario[i].perfil_id=usuario.perfil_id;
+   atualizar(id,perfil){ 
+       for (let i=0; i<this.arrayPerfil.length;i ++){
+           if(this.arrayPerfil[i].id==id){
+             this.arrayPerfil[i].perfil_nome=perfil.perfil_nome;
            }
        }
      }
    //Funcion que adiciona os dados na array
-   adicionar(usuario){
-     this.arrayUsuario.push(usuario);
+   adicionar(perfil){
+     this.arrayPerfil.push(perfil);
      this.id++;
     }
    //Funcion que le os dados digitados na modal de cadastro
    lerDados(){
-     let usuario = {}
+     let perfil = {}
      
-     usuario.id=this.id;
-     usuario.nome = document.getElementById("usuario").value.trim();
-     usuario.email = document.getElementById("email").value.trim();
-     return usuario;
+     perfil.id=this.id;
+     perfil.perfil_nome = document.getElementById("perfil_nome").value.trim();
+     return perfil;
     }
    //Funcion que valida os campos e chama um alert se os dados nao foram preenchidos corretamente
-   validaCampos(usuario){
+   validaCampos(perfil){
       let msg= "";
 
-      if (usuario.nome == ''){
-        msg+="- Informe o nome do usuario\n"
+      if (usuario.perfil_nome == ''){
+        msg+="- Informe o nome do perfil\n"
       }
-      if (usuario.email == ''){
-        msg+="- Informe o Email\n"
+      if (usuario.tipo == ''){
+        msg+="- Informe o tipo\n"
       }
       if (msg !=""){
         alert(msg);
@@ -360,8 +308,8 @@ class Usuario{
     }
    //Funcion que limpa os campos da modal de cadastro
    limpar(){
-     document.getElementById("email").value='';
-     document.getElementById("usuario").value='';
+     //document.getElementById("tipo").value='';
+     document.getElementById("perfil_id").value='';
     }
 
      excluir(id){
@@ -379,7 +327,7 @@ class Usuario{
      
      }
 }
-var usuario = new Usuario();
+var perfil = new Perfil();
 
  function abrirCadastro() {
    window.location.href = "cadastro.php";
@@ -390,13 +338,12 @@ var usuario = new Usuario();
  function abrirTabela() {
             window.location.href = "tabela.php";
           }
-function abrirTabelaPerfil() {
-            window.location.href = "perfil.php";
-          }
-
+  function abrirTabelaUsuario() {
+    window.location.href = "tabelaUsuario.php";
+  }
 // produto.listaTabela();
 
 </script>
 </body>
 </html>
-<?php  echo "<script> usuario.arrayUsuario = JSON.parse('" . json_encode($usuarios) . "')</script>" ?>
+<?php  echo "<script> perfil.arrayPerfil = JSON.parse('" . json_encode($perfis) . "')</script>" ?>
